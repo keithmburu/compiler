@@ -14,6 +14,9 @@
  *	ArithmeticNode(std::string op, list<ExprNode *>)
  *	VarUseNode(std::string name)
  *	CallNode(std::string name, HaverfordCS::list<ExprNode *>arguments)
+ *
+ *  The "generateHERA" methods are usually called by calling generateFullHERA on the root,
+ *      which puts "CBON" at the start.
  */
 
 // C++ Usage Note:
@@ -53,6 +56,10 @@ public:
 	virtual std::string generateHERA(const ContextInfo &info) const = 0;
 	// virtual typeInfo type() = 0;  // type info not required in 2019
 };
+
+std::string generateFullHERA(ExprNode *presumedRoot);
+
+
 
 // Now, the various specific kinds of expressions we might have:
 

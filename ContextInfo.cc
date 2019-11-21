@@ -8,7 +8,7 @@ static const int minRegNum= 1;  // Lowest  register number we're going to use
 static const int maxRegNum=10;  // Highest register number we're going to use
 
 ContextInfo::ContextInfo():
-	myRegNumber(minRegNum)
+	myRegNumber(maxRegNum)
 {
 }
 
@@ -18,12 +18,12 @@ ContextInfo::ContextInfo(int r):
 {
 }
 
-ContextInfo ContextInfo::evalThisFirst() const
+ContextInfo ContextInfo::evalThisAfter() const
 {
-	if (myRegNumber >= maxRegNum) {
+	if (myRegNumber <= minRegNum) {
 		throw "Out of register numbers, expression to complicated";
 	}
-	return ContextInfo(this->myRegNumber+1);
+	return ContextInfo(this->myRegNumber-1);
 }
 
 std::string ContextInfo::getReg() const

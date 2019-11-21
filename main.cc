@@ -41,7 +41,7 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 			try {
 				ParserResult example1 = new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new IntLiteralNode(6), new IntLiteralNode(7)));
 				trace << "confirming codegen basic functionality on test tree, should get 6*7:" << endl;
-				string code = example1->generateHERA(ContextInfo());
+				string code = generateFullHERA(example1);
 				trace << code << endl;
 
 			} catch (const char *message) {
@@ -55,7 +55,7 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 //				trace << "Completed Parsing, got AST: " << AST.toCode() << endl;
 				try {
 					trace << "Now generating code: " << endl;
-					cout << AST->generateHERA(ContextInfo()) << endl;
+					cout << generateFullHERA(AST) << endl;
 				} catch (const char *message) {
 					cerr << "eval threw exception (typically an unhandled case): " << message << endl;
 					return 4;
