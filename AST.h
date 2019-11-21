@@ -5,7 +5,26 @@
 #include <hc_list.h>
 
 
-class contextInfo; // what information will we need to pass down the tree as we generate code?
+/*
+ *  This file defines the heirarchy of different kinds of AST nodes.
+ *  Currently we have:
+ *    Expressions (an "interface" class) with the following concrete subclasses ("implementers" of the interface):
+ *	IntLiteralNode(int value)
+ *	ComparisonNode(std::string op, ExprNode *lhs, ExprNode *rhs)
+ *	ArithmeticNode(std::string op, list<ExprNode *>)
+ *	VarUseNode(std::string name)
+ *	CallNode(std::string name, HaverfordCS::list<ExprNode *>arguments)
+ */
+
+// C++ Usage Note:
+// The empty class definition of ContextInfo below lets us declare "const ContextInfo &" parameters
+//   without having to define the whole class here, which is fine because, at this point,
+//   we don't care much about what's in it ... we just need to know that there's some way
+//   to pass information down to the subtrees as we evaluate them.
+
+
+// Define the information will we need to pass down the tree as we generate code, see ContextInfo.h
+class ContextInfo;
 
 
 // C++ Usage Note:
@@ -22,50 +41,50 @@ class contextInfo; // what information will we need to pass down the tree as we 
 //  virtual destructors, to help the C++ compiler be sure the right data destructors are called
 
 
-// Class Expr_Node is an interface that defines the methods that all
+// Class ExprNode is an interface that defines the methods that all
 //   expression nodes in our AST will provide
 // C++ does not have Java's "interface" keyword, so instead
 //   we just create a superclass with no data and all functions virtual
 
-class Expr_Node {
+class ExprNode {
 public:
-	virtual ~Expr_Node();
+	virtual ~ExprNode();
 
-	virtual std::string generateHERA(const contextInfo &info) = 0;
+	virtual std::string generateHERA(const ContextInfo &info) const = 0;
 	// virtual typeInfo type() = 0;  // type info not required in 2019
 };
 
 // Now, the various specific kinds of expressions we might have:
 
-class Int_Literal_Node : public Expr_Node {
+class IntLiteralNode : public ExprNode {
 	public:
-		Int_Literal_Node(int value);
+		IntLiteralNode(int value);
 
-		std::string generateHERA(const contextInfo &info);
+		std::string generateHERA(const ContextInfo &info) const;
 	private:
 		int v;  // the value
 };
 
 
-class Comparison_Node : public Expr_Node {  // <= etc., _inherently_binary_ in HaverRacket
+class ComparisonNode : public ExprNode {  // <= etc., _inherently_binary_ in HaverRacket
 	public:
-		Op_Node(std::string op, Expr_Node *lhs, Expr_Node *rhs);
-		~Op_Node();
-		std::string generateHERA(const contextInfo &info);
+		ComparisonNode(std::string op, ExprNode *lhs, ExprNode *rhs);
+	
+		std::string generateHERA(const ContextInfo &info) const;
 	private:
 		std::string o;
-		Expr_Node *left;
-		Expr_Node *right;
+		ExprNode *left;
+		ExprNode *right;
 };
 
-class Arithmetic_Node : public Expr_Node {  // +, *, -, etc.
+class ArithmeticNode : public ExprNode {  // +, *, -, etc.
 	public:
-		Op_Node(std::string op, HaverfordCS::list<Expr_Node *>);
-		~Op_Node();
-		std::string generateHERA(const contextInfo &info);
+		ArithmeticNode(std::string op, HaverfordCS::list<ExprNode *>);
+	
+		std::string generateHERA(const ContextInfo &info) const;
 	private:
 		std::string o;
-		HaverfordCS::list<Expr_Node *>subexps;
+		HaverfordCS::list<ExprNode *>subexps;
 };
 
 
@@ -75,12 +94,25 @@ class Arithmetic_Node : public Expr_Node {  // +, *, -, etc.
      but the x there doesn't count as an _expression_ since we're not asking for its value.
  */
 
-class Var_Use_Node : public Expr_Node {
+class VarUseNode : public ExprNode {
 	public:
-		Var_Use_Node(std::string name);
-		std::string   generateHERA(const contextInfo &info);
+		VarUseNode(std::string name);
+	
+		std::string generateHERA(const ContextInfo &info) const;
 	private:
 		std::string n;
 };
+
+
+class CallNode : public ExprNode {
+	public:
+		CallNode(std::string funcName, HaverfordCS::list<ExprNode *>arguments);
+
+		std::string generateHERA(const ContextInfo &info) const;
+	private:
+		std::string n;  // the name
+		HaverfordCS::list<ExprNode *>argList;
+};
+
 
 #endif /*AST_H_*/

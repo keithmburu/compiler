@@ -41,15 +41,18 @@ identifier	[a-zA-Z][a-z0-9_]*
 [\n\r]		{ continue; }  /* allow MacOS \r as well as \n  -- may double-count in MS Windows */
 \;.*		{ continue; }  /* treat comments like other blank space */
 
-\(			{ tokenCount++; return LPAREN; }
-\)			{ tokenCount++; return RPAREN; }
-\+			{ tokenCount++; return PLUS; }
-\-			{ tokenCount++; return MINUS; }
-\*			{ tokenCount++; return TIMES; }
+"("			{ tokenCount++; return LPAREN; }
+")"			{ tokenCount++; return RPAREN; }
+"+"			{ tokenCount++; return PLUS; }
+"-"			{ tokenCount++; return MINUS; }
+"*"			{ tokenCount++; return TIMES; }
+"="			{ tokenCount++; return OP_COMPARE; }
+"<="			{ tokenCount++; return OP_COMPARE; }
+">="			{ tokenCount++; return OP_COMPARE; }
 
 "<EOF>"		{ tokenCount++; return END_OF_INPUT; }
 
--?{digit}+	  { tokenCount++; return INT; }
+-?{digit}+	  { tokenCount++; return INT_LITERAL; }
 {identifier}  { tokenCount++; return IDENTIFIER; }
 
 .			{ scannerError(); continue; }

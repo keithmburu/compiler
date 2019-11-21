@@ -9,7 +9,7 @@ using HaverfordCS::list;
 // This file has the constructors and destructors;
 //   all the generateHERA methods are together in generateHERA.cc
 
-Expr_Node::~Expr_Node()  // nothing to do, but this ensures all subclasses will have virtual destructors, which C++ likes
+ExprNode::~ExprNode()  // nothing to do, but this ensures all subclasses will have virtual destructors, which C++ likes
 {
 }
 
@@ -21,26 +21,33 @@ Expr_Node::~Expr_Node()  // nothing to do, but this ensures all subclasses will 
 // whereas writing v(value) before the body is like writing
 //     int i=12;  // i is created with "12" from the start
 //
-Int_Literal_Node::Int_Literal_Node(int value) : v(value)
+IntLiteralNode::IntLiteralNode(int value) : v(value)
 {
 }
 
 
 
-Comparison_Node::Comparison_Node(string op, Expr_Node *lhs, Expr_Node *rhs) :
+ComparisonNode::ComparisonNode(string op, ExprNode *lhs, ExprNode *rhs) :
 	o(op),
 	left(lhs),
 	right(rhs)
 {
 }
 
-Arithmetic_Node::Arithmetic_Node(string op, list<Expr_Node *>operands) :
+ArithmeticNode::ArithmeticNode(string op, list<ExprNode *>operands) :
 	o(op),
 	subexps(operands)
 {
 }
 
 
-Var_Use_Node::Var_Use_Node(string name) : n(name)
+VarUseNode::VarUseNode(string name) : n(name)
+{
+}
+
+
+CallNode::CallNode(string funcName, HaverfordCS::list<ExprNode *>arguments) :
+	n(funcName),
+	argList(arguments)
 {
 }
