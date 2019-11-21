@@ -20,7 +20,7 @@ ContextInfo::ContextInfo(int r):
 
 ContextInfo ContextInfo::evalThisFirst() const
 {
-	if (myRegNumber < maxRegNum) {
+	if (myRegNumber >= maxRegNum) {
 		throw "Out of register numbers, expression to complicated";
 	}
 	return ContextInfo(this->myRegNumber+1);

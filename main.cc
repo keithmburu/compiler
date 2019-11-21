@@ -44,7 +44,7 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 				string code = example1->generateHERA(ContextInfo());
 				trace << code << endl;
 
-			} catch (std::string message) {
+			} catch (const char *message) {
 				cerr << "code generation confirmation test threw exception: " << message << endl;
 				return 2;
 			}
@@ -56,11 +56,11 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 				try {
 					trace << "Now generating code: " << endl;
 					cout << AST->generateHERA(ContextInfo()) << endl;
-				} catch (std::string message) {
+				} catch (const char *message) {
 					cerr << "eval threw exception (typically an unhandled case): " << message << endl;
 					return 4;
 				}
-			} catch (std::string message) {
+			} catch (const char *message) {
 				cerr << "that's odd, parser threw exception: " << message << endl;
 				return 3;
 			}
