@@ -19,6 +19,10 @@
  *      which puts "CBON" at the start.
  */
 
+#if ! defined FREE_AST_VIA_DESTRUCTORS
+#define FREE_AST_VIA_DESTRUCTORS true
+#endif
+
 // C++ Usage Note:
 // The empty class definition of ContextInfo below lets us declare "const ContextInfo &" parameters
 //   without having to define the whole class here, which is fine because, at this point,
@@ -66,6 +70,9 @@ std::string generateFullHERA(ExprNode *presumedRoot);
 class IntLiteralNode : public ExprNode {
 	public:
 		IntLiteralNode(int value);
+#if FREE_AST_VIA_DESTRUCTORS
+		~IntLiteralNode();  // just used for trace output
+#endif
 
 		std::string generateHERA(const ContextInfo &info) const;
 	private:
@@ -76,7 +83,9 @@ class IntLiteralNode : public ExprNode {
 class ComparisonNode : public ExprNode {  // <= etc., _inherently_binary_ in HaverRacket
 	public:
 		ComparisonNode(std::string op, ExprNode *lhs, ExprNode *rhs);
-	
+#if FREE_AST_VIA_DESTRUCTORS
+		~ComparisonNode();
+#endif
 		std::string generateHERA(const ContextInfo &info) const;
 	private:
 		std::string o;
@@ -87,6 +96,9 @@ class ComparisonNode : public ExprNode {  // <= etc., _inherently_binary_ in Hav
 class ArithmeticNode : public ExprNode {  // +, *, -, etc.
 	public:
 		ArithmeticNode(std::string op, HaverfordCS::list<ExprNode *>);
+#if FREE_AST_VIA_DESTRUCTORS
+		~ArithmeticNode();
+#endif
 	
 		std::string generateHERA(const ContextInfo &info) const;
 	private:
@@ -114,6 +126,9 @@ class VarUseNode : public ExprNode {
 class CallNode : public ExprNode {
 	public:
 		CallNode(std::string funcName, HaverfordCS::list<ExprNode *>arguments);
+#if FREE_AST_VIA_DESTRUCTORS
+		~CallNode();
+#endif
 
 		std::string generateHERA(const ContextInfo &info) const;
 	private:

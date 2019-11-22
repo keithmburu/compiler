@@ -1,3 +1,13 @@
+/*
+ * "Compiler" project for HaverRacket
+ *  Translate a subset of Racket into HERA
+ *
+ * To run this project and run the program tests/01-multiply.hrk, use the command:
+ *   Debug/Compiler-C++-withgitandfiles < tests/01-multiply.hrk | tee Compiler.out
+ * and then run the HERA program with the command
+ *   HERA-C-Run Compiler.out
+ */
+
 #include <iostream>
 #include <cstdlib>
 #include "scannerDemo.h"
@@ -56,6 +66,9 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 				try {
 					trace << "Now generating code: " << endl;
 					cout << generateFullHERA(AST) << endl;
+#if FREE_AST_VIA_DESTRUCTORS
+					delete AST;
+#endif
 				} catch (const char *message) {
 					cerr << "eval threw exception (typically an unhandled case): " << message << endl;
 					return 4;
@@ -72,4 +85,3 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 		return 66;
 	}
 }
-
