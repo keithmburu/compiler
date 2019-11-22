@@ -70,5 +70,5 @@ string CallNode::generateHERA(const ContextInfo &context) const
 	}
 	// NOTE that calls to exit and getint don't need parameters and don't perturb registers
 	return ("MOVE(FP_alt, SP)\nCALL(FP_alt," + n + ")\n"+
-		(context.getReg()=="R1"?"":"MOVE("+context.getReg()+", R1)"));
+		(context.getReg()=="R1"?"":"MOVE("+context.getReg()+", R1)\n"));
 }
