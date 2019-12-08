@@ -119,7 +119,7 @@ ParserResult build_example1()
     though it might seem at first to work:
 
 	ExprNode *product     = new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new IntLiteralNode(6), new IntLiteralNode(7)));
-	ExprNode *selfCompare = new ComparisonNode("+", product, product);
+	ExprNode *selfCompare = new ComparisonNode("<=", product, product);
 	return selfCompare;
 */
 }
