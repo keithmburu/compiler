@@ -22,18 +22,36 @@ using std::endl;
 using std::string;
 
 #include "streams.h"
-// uncomment one of the following definitions to enable tracing/debugging output
-std::ostream &trace  = std::cerr;
-// #include <fstream>  /* needed for ofstream below */
-// std::ofstream _trace("/dev/null");	// output to "null", which discards all data
-// std::ostream &trace = _trace;
 
-// uncomment one of the following definitions to control the prompt
-std::ostream &prompt  = std::cerr;
-// #include <fstream>  /* needed for ofstream below */
-// std::ofstream _prompt("/dev/null");	// output to "null", which discards all data
-// std::ostream &prompt = _prompt;
+// to change trace output, compile with
+//   e.g. -DTRACE_OUTPUT_HERE="./my-trace-output.txt"
+//     or -DTRACE_OUTPUT_HERE="/dev/stderr" # (on linux), to throw away trace output
+//     or -DTRACE_OUTPUT_HERE="/dev/stderr" # (on linux), to always use cerr
+//     or -DTRACE_OUTPUT_HERE=(getenv("HAVERRACKET_TRACE")?getenv("HAVERRACKET_TRACE"):"/dev/stderr")
+//        # that last, the default (I hope) should allow run-time selection via e.g.,
+//        HAVERRACKET_TRACE=my-trace-output1.txt Debug/Compiler-C++
+//
+//  similarly for -DPROMPT_OUTPUT_HERE, which defaults to getenv("HAVERRACKET_PROMPT")
+//    note that prompt is not currently used, though
 
+#if ! defined TRACE_OUTPUT_HERE
+#define TRACE_OUTPUT_HERE (getenv("HAVERRACKET_TRACE")?getenv("HAVERRACKET_TRACE"):"/dev/stderr")
+#endif
+#if ! defined PROMPT_OUTPUT_HERE
+#define PROMPT_OUTPUT_HERE (getenv("HAVERRACKET_PROMPT")?getenv("HAVERRACKET_PROMPT"):"/dev/stderr")
+#endif
+
+#include <fstream>  /* needed for ofstream below */
+std::ofstream _HaverRacket_trace(TRACE_OUTPUT_HERE);
+std::ostream &trace  = _HaverRacket_trace;
+std::ofstream _HaverRacket_prompt(PROMPT_OUTPUT_HERE);
+std::ostream &prompt = _HaverRacket_prompt;
+
+#if ! defined AbstractSyntaxTest
+#define AbstractSyntaxTest build_example1   /* this lets us use a different test easily with a special command line */
+#endif
+
+ParserResult AbstractSyntaxTest();
 
 int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 {
@@ -49,8 +67,9 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 			scannerDemo();
 		} else {
 			try {
-				ParserResult example1 = new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new IntLiteralNode(6), new IntLiteralNode(7)));
-				trace << "confirming codegen basic functionality on test tree, should get 6*7:" << endl;
+				ParserResult example1 = AbstractSyntaxTest();
+
+				trace << "confirming codegen basic functionality on test example1:" << generateFullHERA(example1) << endl;
 				string code = generateFullHERA(example1);
 				trace << code << endl;
 
@@ -60,7 +79,6 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 			}
 
 			try {
-				prompt << "> "; // like Racket :-)
 				ParserResult AST = matchStartSymbolAndEOF();
 //				trace << "Completed Parsing, got AST: " << AST.toCode() << endl;
 				try {
@@ -85,3 +103,21 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 		return 66;
 	}
 }
+
+
+	    
+
+ParserResult build_example1()
+{
+	return new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new IntLiteralNode(6), new IntLiteralNode(7)));
+/*
+  NOTE that the starter files ExprNode classes do _not_ support the following due to memory allocation techniques,
+    though it might seem at first to work:
+
+	ExprNode *product     = new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new IntLiteralNode(6), new IntLiteralNode(7)));
+	ExprNode *selfCompare = new ComparisonNode("+", product, product);
+	trace << "confirming codegen basic functionality on test tree:" << endl;
+	string code = generateFullHERA(selfCompare);
+*/
+}
+

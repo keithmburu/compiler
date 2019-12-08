@@ -23,6 +23,10 @@ string ComparisonNode::generateHERA(const ContextInfo &context) const
 {
 	trace << "Entered ComparisonNode::generateHERA for comparison " + o << endl;
 
+	// see arithmetic node for more about the "context" stuff:
+	//	trace << "need to compare the result of left-hand-side:\n" << left->generateHERA(context) << endl;
+	//	trace << "                        with right-hand-side:\n" << left->generateHERA(context.evalThisAfter()) << endl;
+
 	throw "comparison node code generation not implemented yet";
 }
 

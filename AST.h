@@ -8,7 +8,7 @@
 /*
  *  This file defines the heirarchy of different kinds of AST nodes.
  *  Currently we have:
- *    Expressions (an "interface" class) with the following concrete subclasses ("implementers" of the interface):
+ *    ExprNode (an "interface" class for expressions, with the following concrete subclasses ("implementers" of the interface):
  *	IntLiteralNode(int value)
  *	ComparisonNode(std::string op, ExprNode *lhs, ExprNode *rhs)
  *	ArithmeticNode(std::string op, list<ExprNode *>)
