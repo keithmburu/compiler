@@ -75,6 +75,7 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 					trace << "confirming codegen basic functionality on test example1:" << endl;
 					string code = generateFullHERA(example1);
 					trace << code << endl;
+					delete example1;  // we're done with example1 now.
 
 				} catch (const char *message) {
 					cerr << "code generation confirmation test threw exception: " << message << endl;
