@@ -66,16 +66,20 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 			cout << "Demonstrating lexical scanner. Enter tokens followed by <EOF>." << endl;
 			scannerDemo();
 		} else {
-			try {
-				ParserResult example1 = AbstractSyntaxTest();
+			if (!getenv("HAVERRACKET_TEST_CODE_HERA") ||
+			    getenv("HAVERRACKET_TEST_CODE_HERA") == string("#t"))
+			{
+				try {
+					ParserResult example1 = AbstractSyntaxTest();
 
-				trace << "confirming codegen basic functionality on test example1:" << generateFullHERA(example1) << endl;
-				string code = generateFullHERA(example1);
-				trace << code << endl;
+					trace << "confirming codegen basic functionality on test example1:" << endl;
+					string code = generateFullHERA(example1);
+					trace << code << endl;
 
-			} catch (const char *message) {
-				cerr << "code generation confirmation test threw exception: " << message << endl;
-				return 2;
+				} catch (const char *message) {
+					cerr << "code generation confirmation test threw exception: " << message << endl;
+					return 2;
+				}
 			}
 
 			try {

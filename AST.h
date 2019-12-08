@@ -55,7 +55,8 @@ class ContextInfo;
 
 class ExprNode {
 public:
-	virtual ~ExprNode();
+	ExprNode();           // just used for memory allocation labs, to print trace information
+	virtual ~ExprNode();  // used for actual memory allocation, sometimes, and for tracing
 
 	virtual std::string generateHERA(const ContextInfo &info) const = 0;
 	// virtual typeInfo type() = 0;  // type info not required in 2019
@@ -70,9 +71,7 @@ std::string generateFullHERA(ExprNode *presumedRoot);
 class IntLiteralNode : public ExprNode {
 	public:
 		IntLiteralNode(int value);
-#if FREE_AST_VIA_DESTRUCTORS
 		~IntLiteralNode();  // just used for trace output
-#endif
 
 		std::string generateHERA(const ContextInfo &info) const;
 	private:
@@ -116,6 +115,7 @@ class ArithmeticNode : public ExprNode {  // +, *, -, etc.
 class VarUseNode : public ExprNode {
 	public:
 		VarUseNode(std::string name);
+		~VarUseNode();
 	
 		std::string generateHERA(const ContextInfo &info) const;
 	private:
