@@ -113,14 +113,13 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 
 ParserResult build_example1()
 {
-	return new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new IntLiteralNode(6), new IntLiteralNode(7)));
+	ExprNode *product = new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new IntLiteralNode(3), new IntLiteralNode(7)));
+	return product;
 /*
   NOTE that the starter files ExprNode classes do _not_ support the following due to memory allocation techniques,
     though it might seem at first to work:
-
-	ExprNode *product = new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new IntLiteralNode(3), new IntLiteralNode(7)));
-	return new ArithmeticNode("+", ez_list<ExprNode *>(product, product));
-	// return new ComparisonNode("<=", product, product);
 */
+	// return new ArithmeticNode("+", HaverfordCS::ez_list<ExprNode *>(product, product));
+	// return new ComparisonNode("<=", product, product);
 }
 
