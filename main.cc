@@ -120,8 +120,7 @@ ParserResult build_example1()
 
 	ExprNode *product     = new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new IntLiteralNode(6), new IntLiteralNode(7)));
 	ExprNode *selfCompare = new ComparisonNode("+", product, product);
-	trace << "confirming codegen basic functionality on test tree:" << endl;
-	string code = generateFullHERA(selfCompare);
+	return selfCompare;
 */
 }
 
