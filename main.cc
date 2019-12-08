@@ -118,9 +118,9 @@ ParserResult build_example1()
   NOTE that the starter files ExprNode classes do _not_ support the following due to memory allocation techniques,
     though it might seem at first to work:
 
-	ExprNode *product     = new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new IntLiteralNode(6), new IntLiteralNode(7)));
-	ExprNode *selfCompare = new ComparisonNode("<=", product, product);
-	return selfCompare;
+	ExprNode *product = new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new IntLiteralNode(3), new IntLiteralNode(7)));
+	ExprNode *selfSum = new ComparisonNode("+", product, product);
+	return selfSum;
 */
 }
 
