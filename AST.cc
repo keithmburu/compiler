@@ -36,7 +36,7 @@ static std::ofstream alloc_trace(getenv("HAVERRACKET_ALLOC_TRACE")?getenv("HAVER
 IntLiteralNode::IntLiteralNode(int value) : v(value)
 {
 	// nothing else needs to be done here, since the stuff above defines "v" as "value"
-	alloc_trace << "(class IntLiteralNode constructor called for node at memory " << this << endl;
+	alloc_trace << "(class IntLiteralNode constructor called for node at memory " << this << " and value=" << value << endl;
 }
 
 // (so, we should see this trace before the one above, for each int literal node)
@@ -96,7 +96,7 @@ ExprNode::~ExprNode()  // nothing to do, but this ensures all subclasses will ha
 
 IntLiteralNode::~IntLiteralNode()
 {
-	alloc_trace << " class IntLiteralNode  destructor called for node at memory " << this << ")" << endl;
+	alloc_trace << " class IntLiteralNode  destructor called for node at memory " << this << " that had value=" << v << ")" << endl;
 	// nothing needs to be done here,
 	//  except for tracing we could have omitted this.
 }
