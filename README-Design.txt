@@ -8,7 +8,7 @@ Important Design Decisions:
 
 Project Status (T = code completed and test suite exists, C = code completed, P = in-progress, N = not started):
 
-   C  Parse + and* operations, constants and identifiers
+   C  Parse + and * operations, constants and identifiers
    C  Build an Object-Oriented AST from the above
    C  Appropriately allocate registers for arithmetic operations
    C  Generate HERA code for +, *, and constants

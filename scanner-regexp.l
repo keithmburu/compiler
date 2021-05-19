@@ -43,6 +43,8 @@ identifier	[a-zA-Z][a-z0-9_]*
 
 "("			{ tokenCount++; return LPAREN; }
 ")"			{ tokenCount++; return RPAREN; }
+"["			{ tokenCount++; return LBRACKET; }
+"]"			{ tokenCount++; return RBRACKET; }
 "+"			{ tokenCount++; return PLUS; }
 "-"			{ tokenCount++; return MINUS; }
 "*"			{ tokenCount++; return TIMES; }
@@ -53,6 +55,8 @@ identifier	[a-zA-Z][a-z0-9_]*
 "<EOF>"		{ tokenCount++; return END_OF_INPUT; }
 
 -?{digit}+	  { tokenCount++; return INT_LITERAL; }
+(#t|#f)	  { tokenCount++; return BOOL_LITERAL; }
+
 {identifier}  { tokenCount++; return IDENTIFIER; }
 
 .			{ scannerError(); continue; }

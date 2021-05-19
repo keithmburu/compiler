@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include "scannerDemo.h"
 #include "parser.h"
-#include "AST.h"
 #include "ContextInfo.h"
 #include "hc_list_helpers.h" // ez_list
 
@@ -22,6 +21,7 @@ using std::endl;
 using std::string;
 
 #include "streams.h"
+#include "Dictionary.h"
 
 // to change trace output, compile with
 //   e.g. -DTRACE_OUTPUT_HERE="./my-trace-output.txt"
@@ -57,7 +57,7 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 {
 	try {
 		bool testScannerInstead = false;
-		if (numberOfCommandLineArguments == 2 && theCommandLineArguments[1] == string("testScannerInstead")) {
+        if (numberOfCommandLineArguments == 2 && theCommandLineArguments[1] == string("testScannerInstead")) {
 			trace << "Testing Scanner instead." << endl;
 			testScannerInstead = true;
 		}
@@ -69,26 +69,26 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 			if (!getenv("HAVERRACKET_TEST_CODE_HERA") ||
 			    getenv("HAVERRACKET_TEST_CODE_HERA") == string("#t"))
 			{
-				try {
-					ParserResult example1 = AbstractSyntaxTest();
-
-					trace << "confirming codegen basic functionality on test example1:" << endl;
-					string code = generateFullHERA(example1);
-					trace << code << endl;
-					delete example1;  // we're done with example1 now.
-
-				} catch (const char *message) {
-					cerr << "code generation confirmation test threw exception: " << message << endl;
-					return 2;
-				}
+//				try {
+//					ParserResult example1 = AbstractSyntaxTest();
+//
+//					trace << "confirming codegen basic functionality on test example1:" << endl;
+//					string code = generateFullHERA(example1);
+//					trace << code << endl;
+//					delete example1;  // we're done with example1 now.
+//
+//				} catch (const char *message) {
+//					cerr << "code generation confirmation test threw exception: " << message << endl;
+//					return 2;
+//				}
 			}
 
 			try {
 				ParserResult AST = matchStartSymbolAndEOF();
 //				trace << "Completed Parsing, got AST: " << AST.toCode() << endl;
 				try {
-					trace << "Now generating code: " << endl;
-					cout << generateFullHERA(AST) << endl;
+                    trace << "\nNow generating code: " << endl;
+					trace << generateFullHERA(AST) << endl;
 				} catch (const char *message) {
 					cerr << "eval threw exception (typically an unhandled case): " << message << endl;
 					return 4;
@@ -115,7 +115,10 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 ParserResult build_example1()
 {
 	ExprNode *product = new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new IntLiteralNode(3), new IntLiteralNode(7)));
-	return product;
+//  ExprNode *product = new ArithmeticNode("*", HaverfordCS::ez_list<ExprNode *>(new BoolLiteralNode("#t"), new BoolLiteralNode("#f")));
+//    ExprNode *product = new ConditionalNode("if", ComparisonNode  *>(new BoolLiteralNode("#t"), new BoolLiteralNode("#f")));
+
+    return product;
 /*
   NOTE that the starter files ExprNode classes do _not_ support the following due to memory allocation techniques,
     though it might seem at first to work:

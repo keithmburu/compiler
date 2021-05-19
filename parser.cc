@@ -22,6 +22,9 @@ using std::endl;
 // E_IN_PARENS -> OP E E
 // E_IN_PARENS -> EXIT
 // E_IN_PARENS -> GETINT   // New in this version, gets user input
+// E_IN_PARENS -> if
+// if -> E E E
+
 // OP --> +|-|*| OP_COMPARE
 
 // Declare all functions, so they can call each other in any order
@@ -36,7 +39,7 @@ static string matchOp();
 //  defined in terms of kindOfToken from scanner-regexp.h
 static list<kindOfToken> FIRST_OP  = ez_list(PLUS, MINUS, TIMES, OP_COMPARE);
 static list<kindOfToken> FIRST_EIP = FIRST_OP;
-static list<kindOfToken> FIRST_E   = ez_list(INT_LITERAL, IDENTIFIER, LPAREN);
+static list<kindOfToken> FIRST_E   = ez_list(INT_LITERAL, BOOL_LITERAL, IDENTIFIER, LPAREN, LBRACKET);
 
 static list<kindOfToken> FOLLOW_OP  = FIRST_E;
 static list<kindOfToken> FOLLOW_EIP = ez_list(RPAREN);
@@ -97,9 +100,11 @@ static ParserResult matchE()
 {
 	trace << "Entering matchE, current token is " << currentToken() << endl;
 	if (currentTokenKind() == INT_LITERAL) {
-	        return new IntLiteralNode(std::stoi(currentTokenThenMove()));
-	} else if (currentTokenKind() == IDENTIFIER) {	
-	    	return new VarUseNode(currentTokenThenMove());
+        return new IntLiteralNode(std::stoi(currentTokenThenMove()));
+    } else if (currentTokenKind() == BOOL_LITERAL) {
+        return new BoolLiteralNode(currentTokenThenMove());
+	} else if (currentTokenKind() == IDENTIFIER) {
+        return new VarUseNode(currentTokenThenMove());
 	} else if (currentTokenKind() == LPAREN) {	
 		confirmLiteral("(");
 		mustGetNextToken();
@@ -122,16 +127,39 @@ static ParserResult matchE()
 static ParserResult matchEInParens() {
 	trace << "Entering matchEInParens, current token is " << currentToken() << endl;
 	if (find(currentTokenKind(), FIRST_OP)) {
-		bool its_a_comparison_op = (currentTokenKind() == OP_COMPARE);
-		string theOp = matchOp();
-		ParserResult firstChild = matchE();
-		ParserResult secondChild = matchE();
-		if (its_a_comparison_op) { // a comparison
-			return new ComparisonNode(theOp, firstChild, secondChild);
-		} else {
-			return new ArithmeticNode(theOp, ez_list(firstChild, secondChild));
-		}
-	} else if (currentTokenKind() == IDENTIFIER && currentToken() == "exit") {
+        bool its_a_comparison_op = (currentTokenKind() == OP_COMPARE);
+        string theOp = matchOp();
+        ParserResult firstChild = matchE();
+        ParserResult secondChild = matchE();
+        if (its_a_comparison_op) { // a comparison
+            return new ComparisonNode(theOp, firstChild, secondChild);
+        } else {
+            return new ArithmeticNode(theOp, ez_list(firstChild, secondChild));
+        }
+    } else if (currentTokenKind() == LBRACKET) {
+        list<ExprNode *> declarations = list<ExprNode *>();
+	    while (currentTokenKind() != RPAREN) {
+            mustGetNextToken();
+            declarations = list(matchEinBrackets(), declarations);
+            confirmLiteral("]");
+            mustGetNextToken();
+        }
+	    return new DeclarationsNode(declarations);
+    } else if (currentTokenKind() == IDENTIFIER && currentToken() == "if") {
+	    mustGetNextToken();
+	    ParserResult condition = matchE();
+        ParserResult expriftrue = matchE();
+        ParserResult expriffalse = matchE();
+        return new ConditionalNode(condition, expriftrue, expriffalse);
+    } else if (currentTokenKind() == IDENTIFIER && currentToken() == "let") {
+        mustGetNextToken();
+        ParserResult declarations = matchE();
+        list<ExprNode *> expressions = list<ExprNode *>();
+        while (currentToken() != ")") {
+            expressions = list(matchE(), expressions);
+        }
+	    return new LetNode(declarations, expressions);
+    } else if (currentTokenKind() == IDENTIFIER && currentToken() == "exit") {
 		return new CallNode(currentTokenThenMove(), list<ParserResult>());
 	} else if (currentTokenKind() == IDENTIFIER && currentToken() == "getint") {
 		return new CallNode(currentTokenThenMove(), list<ParserResult>());
@@ -141,6 +169,17 @@ static ParserResult matchEInParens() {
 	}
 }
 
+static ParserResult matchEinBrackets() {
+    if (currentTokenKind() == IDENTIFIER) {
+        VarUseNode variable = VarUseNode(currentTokenThenMove());
+        if (currentTokenKind() == INT_LITERAL) {
+            IntLiteralNode literal = IntLiteralNode(stoi(currentTokenThenMove()));
+            return new DeclarationNode(variable, literal);
+        }
+    }
+    std::cerr << "Illegal token (" << currentToken() << ") at token #" << tokenNumber() << endl;
+    exit(3);
+}
 
 // match an operator, assuming that it is the currentToken
 //  leave the currentToken AFTER the last part of what was matched, i.e. unchanged

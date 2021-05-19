@@ -1,4 +1,5 @@
 #include "ContextInfo.h"
+#include <string.h>
 
 // To provide unique register numbers for each subexpression, with leftmost-executed-first
 //   we'll start with 1 at the root, make the rightmost child's number same as its parent,
@@ -6,6 +7,8 @@
 
 static const int minRegNum= 1;  // Lowest  register number we're going to use
 static const int maxRegNum=10;  // Highest register number we're going to use
+static const char labeler[] = "abcdefghijklmnopqrstuvwxyz";
+std::string label;
 
 ContextInfo::ContextInfo():
 	myRegNumber(maxRegNum)
@@ -29,4 +32,15 @@ ContextInfo ContextInfo::evalThisAfter() const
 std::string ContextInfo::getReg() const
 {
 	return "R"+std::to_string(myRegNumber);
+}
+
+std::string ContextInfo::labelfunc() const
+{
+    std::string label = "L";
+    return label + labeler[random() % 26] + labeler[random() % 26] + labeler[random() % 26] + labeler[random() % 26];
+}
+
+std::string ContextInfo::getLabel() const
+{
+    return label;
 }

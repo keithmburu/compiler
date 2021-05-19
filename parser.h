@@ -9,5 +9,9 @@
 typedef ExprNode *ParserResult;
 
 ParserResult matchStartSymbolAndEOF();
+static ParserResult matchE();
+static ParserResult matchEinParens();
+static ParserResult matchEinBrackets();
+static std::string matchOp();
 
 #endif /*PARSER_H_*/

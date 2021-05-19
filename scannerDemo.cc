@@ -10,7 +10,7 @@ void scannerDemo()
 	while (getNextToken(), tokenAvailable()) {
 		cout << "Token number " << tokenNumber() << " is ";
 		cout << "'" << currentToken() << "'";
-		cout << ", which is token kind " << currentTokenKind() << endl;
+		cout << ", which is token kind " << kindOfToken(currentTokenKind()) << endl;
 	}
 	cout << "Reached end-of-file, now stopping!" << endl;
 }

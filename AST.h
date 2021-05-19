@@ -3,6 +3,8 @@
 
 #include <string>
 #include <hc_list.h>
+#include "ContextInfo.h"
+#include "Dictionary.h"
 
 
 /*
@@ -33,6 +35,7 @@
 // Define the information will we need to pass down the tree as we generate code, see ContextInfo.h
 class ContextInfo;
 
+extern Dictionary declarationDict;
 
 // C++ Usage Note:
 //
@@ -59,7 +62,7 @@ public:
 	virtual ~ExprNode();  // used for actual memory allocation, sometimes, and for tracing
 
 	virtual std::string generateHERA(const ContextInfo &info) const = 0;
-	// virtual typeInfo type() = 0;  // type info not required in 2019
+    // virtual typeInfo type() = 0;  // type info not required in 2019
 };
 
 std::string generateFullHERA(ExprNode *presumedRoot);
@@ -73,23 +76,36 @@ class IntLiteralNode : public ExprNode {
 		IntLiteralNode(int value);
 		~IntLiteralNode();  // just used for trace output
 
+		int getValue() const;
+
 		std::string generateHERA(const ContextInfo &info) const;
 	private:
 		int v;  // the value
 };
 
+class BoolLiteralNode : public ExprNode {
+public:
+    BoolLiteralNode(std::string value);
+    ~BoolLiteralNode();  // just used for trace output
+
+    int getValue();
+
+    std::string generateHERA(const ContextInfo &info) const;
+private:
+    int v;  // the value
+};
 
 class ComparisonNode : public ExprNode {  // <= etc., _inherently_binary_ in HaverRacket
-	public:
-		ComparisonNode(std::string op, ExprNode *lhs, ExprNode *rhs);
+public:
+    ComparisonNode(std::string op, ExprNode *lhs, ExprNode *rhs);
 #if FREE_AST_VIA_DESTRUCTORS
-		~ComparisonNode();
+    ~ComparisonNode();
 #endif
-		std::string generateHERA(const ContextInfo &info) const;
-	private:
-		std::string o;
-		ExprNode *left;
-		ExprNode *right;
+    std::string generateHERA(const ContextInfo &info) const;
+private:
+    std::string o;
+    ExprNode *left;
+    ExprNode *right;
 };
 
 class ArithmeticNode : public ExprNode {  // +, *, -, etc.
@@ -116,6 +132,8 @@ class VarUseNode : public ExprNode {
 	public:
 		VarUseNode(std::string name);
 		~VarUseNode();
+
+        std::string getValue() const;
 	
 		std::string generateHERA(const ContextInfo &info) const;
 	private:
@@ -136,5 +154,57 @@ class CallNode : public ExprNode {
 		HaverfordCS::list<ExprNode *>argList;
 };
 
+class ConditionalNode : public ExprNode {
+public:
+    ConditionalNode(ExprNode *condition, ExprNode *expriftrue, ExprNode *expriffalse);
+#if FREE_AST_VIA_DESTRUCTORS
+    ~ConditionalNode();
+#endif
+    std::string generateHERA(const ContextInfo &info) const;
+private:
+    ExprNode *condition;
+    ExprNode *expriftrue;
+    ExprNode *expriffalse;
+};
+
+class DeclarationsNode : public ExprNode {
+public:
+    DeclarationsNode(HaverfordCS::list<ExprNode *> declarations);
+    HaverfordCS::list<ExprNode *> getDeclarations();
+    std::string declarationsHelper(std::string declarationsHERA, HaverfordCS::list<ExprNode *> declarations, ContextInfo context,
+                                    int FPoffset) const;
+#if FREE_AST_VIA_DESTRUCTORS
+    ~DeclarationsNode();
+#endif
+    std::string generateHERA(const ContextInfo &info) const;
+private:
+    HaverfordCS::list<ExprNode *> declarations;
+};
+
+class DeclarationNode : public ExprNode {
+public:
+    DeclarationNode(VarUseNode variable, IntLiteralNode literal);
+#if FREE_AST_VIA_DESTRUCTORS
+    ~DeclarationNode();
+#endif
+
+    std::string generateHERA(const ContextInfo &info) const;
+private:
+    VarUseNode variable;
+    IntLiteralNode literal;
+};
+
+class LetNode : public ExprNode {
+public:
+    LetNode(ExprNode *declarations, HaverfordCS::list<ExprNode *> expressions);
+#if FREE_AST_VIA_DESTRUCTORS
+    ~LetNode();
+#endif
+    std::string generateHERA(const ContextInfo &info) const;
+    std::string expressionsHelper(std::string expressionsHERA, HaverfordCS::list<ExprNode *> expressions, ContextInfo context) const;
+    private:
+    ExprNode *declarations;
+    HaverfordCS::list<ExprNode *> expressions;
+};
 
 #endif /*AST_H_*/

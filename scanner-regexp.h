@@ -3,7 +3,9 @@ enum kindOfToken {
 	LPAREN,	RPAREN,
 	PLUS,	MINUS,	TIMES,
 	OP_COMPARE,
-	INT_LITERAL, IDENTIFIER
+	INT_LITERAL, BOOL_LITERAL,
+	IDENTIFIER, LBRACKET,
+	RBRACKET
 };
 
 void scannerError(); /// define in whatever uses the regexp-based scanner
