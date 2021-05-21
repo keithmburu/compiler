@@ -13,5 +13,6 @@ static ParserResult matchE();
 static ParserResult matchEinParens();
 static ParserResult matchEinBrackets();
 static std::string matchOp();
+list<ExprNode *> reverse(list<ExprNode *> list, ::list<ExprNode *> newList);
 
 #endif /*PARSER_H_*/

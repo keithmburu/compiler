@@ -26,6 +26,7 @@ static std::ofstream alloc_trace(getenv("HAVERRACKET_ALLOC_TRACE")?getenv("HAVER
 // C++ Usage Note:
 // The v(value) is like having v=value, but initializes v rather than assigning to it
 // i.e., writing "v = value" in the constructor _body_ is like writing
+// i.e., writing "v = value" in the constructor _body_ is like writing
 //     int i;
 //     i = 12;
 // whereas writing v(value) before the body is like writing
@@ -38,15 +39,11 @@ IntLiteralNode::IntLiteralNode(int value) : v(value)
 	alloc_trace << "(class IntLiteralNode constructor called for node at memory " << this << " and value=" << value << endl;
 }
 
-int IntLiteralNode::getValue() const { return v; }
-
 BoolLiteralNode::BoolLiteralNode(string value) : v((value == "#t")? 1 : 0)
 {
     // nothing else needs to be done here, since the stuff above defines "v" as "value"
     alloc_trace << "(class BoolLiteralNode constructor called for node at memory " << this << " and value=" << value << endl;
 }
-
-int BoolLiteralNode::getValue() { return v; }
 
 // (so, we should see this trace before the one above, for each int literal node)
 ExprNode::ExprNode()
@@ -75,8 +72,6 @@ VarUseNode::VarUseNode(string name) : n(name)
 	alloc_trace << "(class     VarUseNode constructor called for node at memory " << this << endl;
 }
 
-string VarUseNode::getValue() const { return n; }
-
 CallNode::CallNode(string funcName, HaverfordCS::list<ExprNode *>arguments) :
 	n(funcName),
 	argList(arguments)
@@ -89,7 +84,6 @@ ConditionalNode::ConditionalNode(ExprNode *condition, ExprNode *expriftrue, Expr
     expriftrue(expriftrue),
     expriffalse(expriffalse)
 {
-    // nothing else needs to be done here, since the stuff above defines "v" as "value"
     alloc_trace << "(class ConditionalNode constructor called for node at memory " << this << endl;
 }
 
@@ -97,22 +91,44 @@ LetNode::LetNode(ExprNode *declarations, HaverfordCS::list<ExprNode *> expressio
         declarations(declarations),
         expressions(expressions)
 {
-    // nothing else needs to be done here, since the stuff above defines "v" as "value"
     alloc_trace << "(class LetNode constructor called for node at memory " << this << endl;
 }
 
 DeclarationsNode::DeclarationsNode(HaverfordCS::list<ExprNode *> declarations) :
         declarations(declarations)
 {
-    // nothing else needs to be done here, since the stuff above defines "v" as "value"
     alloc_trace << "(class DeclarationsNode constructor called for node at memory " << this << endl;
 }
 
-DeclarationNode::DeclarationNode(VarUseNode variable, IntLiteralNode literal) :
+DeclarationNode::DeclarationNode(VarUseNode variable, IntLiteralNode intLiteral, string declType) :
         variable(variable),
-        literal(literal)
+        intLiteral(intLiteral),
+        declType(declType)
 {
-    // nothing else needs to be done here, since the stuff above defines "v" as "value"
+    alloc_trace << "(class DeclarationNode constructor called for node at memory " << this << endl;
+}
+
+DeclarationNode::DeclarationNode(VarUseNode variable, BoolLiteralNode boolLiteral, string declType) :
+        variable(variable),
+        boolLiteral(boolLiteral),
+        declType(declType)
+{
+    alloc_trace << "(class DeclarationNode constructor called for node at memory " << this << endl;
+}
+
+DeclarationNode::DeclarationNode(VarUseNode variable, VarUseNode definedVar, string declType) :
+        variable(variable),
+        definedVar(definedVar),
+        declType(declType)
+{
+    alloc_trace << "(class DeclarationNode constructor called for node at memory " << this << endl;
+}
+
+DeclarationNode::DeclarationNode(VarUseNode variable, ExprNode *expr, string declType) :
+        variable(variable),
+        expr(expr),
+        declType(declType)
+{
     alloc_trace << "(class DeclarationNode constructor called for node at memory " << this << endl;
 }
 
@@ -220,7 +236,7 @@ DeclarationsNode::~DeclarationsNode()
 
 DeclarationNode::~DeclarationNode()
 {
-    alloc_trace << " class     DeclarationNode  destructor called for node at memory " << this << ")" << endl;
+    alloc_trace << " class     DeclarationsNode  destructor called for node at memory " << this << ")" << endl;
 }
 
 #endif

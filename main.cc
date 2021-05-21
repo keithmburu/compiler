@@ -103,7 +103,7 @@ int main(int numberOfCommandLineArguments, char *theCommandLineArguments[])
 		}
 
 		return 0;  // indicate successful translation if no exit with non-0 before this
-	} catch (...) {
+	} catch (range_error) {
 		cerr << "Yikes! Uncaught exception" << endl;
 		return 66;
 	}

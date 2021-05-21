@@ -36,7 +36,7 @@ std::string ContextInfo::getReg() const
 
 std::string ContextInfo::labelfunc() const
 {
-    std::string label = "L";
+    std::string label = "";
     return label + labeler[random() % 26] + labeler[random() % 26] + labeler[random() % 26] + labeler[random() % 26];
 }
 

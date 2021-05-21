@@ -13,7 +13,6 @@ using std::endl;
 
 #include "streams.h"
 
-
 // match this:
 // START -> E   <followed by end-of-input>
 // E -> number
@@ -144,21 +143,21 @@ static ParserResult matchEInParens() {
             confirmLiteral("]");
             mustGetNextToken();
         }
-	    return new DeclarationsNode(declarations);
+	    return new DeclarationsNode(reverse(declarations, list<ExprNode *>()));
     } else if (currentTokenKind() == IDENTIFIER && currentToken() == "if") {
 	    mustGetNextToken();
 	    ParserResult condition = matchE();
         ParserResult expriftrue = matchE();
         ParserResult expriffalse = matchE();
         return new ConditionalNode(condition, expriftrue, expriffalse);
-    } else if (currentTokenKind() == IDENTIFIER && currentToken() == "let") {
+    } else if (currentTokenKind() == IDENTIFIER && currentToken() == "letstar") {
         mustGetNextToken();
         ParserResult declarations = matchE();
         list<ExprNode *> expressions = list<ExprNode *>();
         while (currentToken() != ")") {
             expressions = list(matchE(), expressions);
         }
-	    return new LetNode(declarations, expressions);
+	    return new LetNode(declarations, reverse(expressions, list<ExprNode *>()));
     } else if (currentTokenKind() == IDENTIFIER && currentToken() == "exit") {
 		return new CallNode(currentTokenThenMove(), list<ParserResult>());
 	} else if (currentTokenKind() == IDENTIFIER && currentToken() == "getint") {
@@ -172,9 +171,21 @@ static ParserResult matchEInParens() {
 static ParserResult matchEinBrackets() {
     if (currentTokenKind() == IDENTIFIER) {
         VarUseNode variable = VarUseNode(currentTokenThenMove());
-        if (currentTokenKind() == INT_LITERAL) {
+        if (currentTokenKind() == IDENTIFIER) {
+            VarUseNode definedVar = VarUseNode(currentTokenThenMove());
+            return new DeclarationNode(variable, definedVar, "definedVar");
+        }
+        else if (currentTokenKind() == INT_LITERAL) {
             IntLiteralNode literal = IntLiteralNode(stoi(currentTokenThenMove()));
-            return new DeclarationNode(variable, literal);
+            return new DeclarationNode(variable, literal, "IntLiteralNode");
+        }
+        else if (currentTokenKind() == BOOL_LITERAL) {
+            BoolLiteralNode literal = BoolLiteralNode(currentTokenThenMove());
+            return new DeclarationNode(variable, literal, "BoolLiteralNode");
+        }
+        else if (currentTokenKind() == LPAREN) {
+            ParserResult expr = matchE();
+            return new DeclarationNode(variable, expr, "ExprNode");
         }
     }
     std::cerr << "Illegal token (" << currentToken() << ") at token #" << tokenNumber() << endl;
@@ -210,4 +221,14 @@ ParserResult matchStartSymbolAndEOF()
 	}
 
 	return fullExpression;
+}
+
+list<ExprNode *> reverse(list<ExprNode *> list, ::list<ExprNode *> newList) {
+    if (empty(list)) {
+        return newList;
+    }
+    if (length(list) == 1) {
+        return ::list(first(list), newList);
+    }
+    return reverse(rest(list), ::list(first(list), newList));
 }

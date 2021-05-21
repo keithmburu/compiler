@@ -11,7 +11,7 @@ int FPoffset = -1;
 
 std::string generateFullHERA(ExprNode *presumedRoot)
 {
-    return "CBON()\n" + presumedRoot->generateHERA(ContextInfo());
+    return "\nCBON()\n" + presumedRoot->generateHERA(ContextInfo());
 }
 
 string IntLiteralNode::generateHERA(const ContextInfo &context) const
@@ -53,12 +53,16 @@ string ComparisonNode::generateHERA(const ContextInfo &context) const
     //	trace << "need to compare the result of left-hand-side:\n" << left->generateHERA(context) << endl;
     //	trace << "                        with right-hand-side:\n" << left->generateHERA(context.evalThisAfter()) << endl;
 
+    if (right->getType() != "IntLiteralNode" || left->getType() != "IntLiteralNode") {
+        cerr << endl << "!Type error! cannot perform comparison operations on non-integers" << endl;
+        exit(98);
+    }
+
     ContextInfo rhsContext = context.evalThisAfter();
     ContextInfo lhsContext = context;  // just named for symmetry
 
     ContextInfo labelContext1 = ContextInfo();
     ContextInfo endLabelContext = ContextInfo();
-
 
     return left->generateHERA(lhsContext) +
            right->generateHERA(rhsContext) +
@@ -82,8 +86,14 @@ string ArithmeticNode::generateHERA(const ContextInfo &context) const
 {
 	trace << "Entered ArithmeticNode::generateHERA for operator " + o << endl;
 	if (length(subexps) != 2) {
-		throw "compiler incomplete/inconsistent: generateHERA not implemented for non-binary arithmetic";
+		throw "generateHERA not implemented for non-binary arithmetic";
 	}
+
+    if (first(subexps)->getType() != "IntLiteralNode" || first(rest(subexps))->getType() != "IntLiteralNode") {
+        cerr << endl << "!Type error! cannot perform arithmetic operations on non-integers" << endl;
+        exit(99);
+    }
+
 	ContextInfo rhsContext = context.evalThisAfter();
 	ContextInfo lhsContext = context;  // just named for symmetry
 
@@ -95,7 +105,6 @@ string ArithmeticNode::generateHERA(const ContextInfo &context) const
 string VarUseNode::generateHERA(const ContextInfo &context) const
 {
 	trace << "Entered VarUseNode::generateHERA for variable " + n << endl;
-    cout << (empty(declarationDict.getList())? "dict is still empty" : "YAY dict has something") << endl;
 
     return "LOAD(" + context.getReg() + ", " + to_string(declarationDict.lookup(n)) + ", FP)\n";
 }
@@ -119,24 +128,25 @@ string ConditionalNode::generateHERA(const ContextInfo &context) const
     ContextInfo expriftrueContext = context.evalThisAfter();
     ContextInfo expriffalseContext = context.evalThisAfter().evalThisAfter();
 
-    ContextInfo labelContext = ContextInfo();
+    ContextInfo labelContext1 = ContextInfo();
+    ContextInfo labelContext2 = ContextInfo();
 
     return  condition->generateHERA(conditionContext) + expriftrue->generateHERA(expriftrueContext) +
             expriffalse->generateHERA(expriffalseContext) +
             "FLAGS(" + conditionContext.getReg() + ")\n" +
-            "BZ(" + context.getLabel() + ")\n" +
+            "BZ(" + labelContext1.getLabel() + ")\n" +
             "MOVE(" + context.getReg() + ", " + expriftrueContext.getReg() + ")\n" +
-            "BR(" + labelContext.getLabel() + ")\n" +
-            "LABEL(" + context.getLabel() + ")\n" +
+            "BR(" + labelContext2.getLabel() + ")\n" +
+            "LABEL(" + labelContext1.getLabel() + ")\n" +
             "MOVE(" + context.getReg() + ", " + expriffalseContext.getReg() + ")\n" +
-            "LABEL(" + labelContext.getLabel() + ")\n";
+            "LABEL(" + labelContext2.getLabel() + ")\n";
 }
 
 string LetNode::generateHERA(const ContextInfo &context) const
 {
     trace << "Entered LetNode::generateHERA" << endl;
     ContextInfo declarationsContext = context;
-    ContextInfo expressionsContext = context.evalThisAfter();
+    ContextInfo expressionsContext = context;
 
     string expressionsHERA = "";
     string declarationsHERA = declarations->generateHERA(declarationsContext);
@@ -159,26 +169,51 @@ string DeclarationsNode::generateHERA(const ContextInfo &context) const
     ContextInfo labelContext = ContextInfo();
 
     string declarationsHERA = "";
-    return  declarationsHelper(declarationsHERA, declarations, context, FPoffset);
+    return  declarationsHelper(declarationsHERA, declarations, context);
 }
 
-string DeclarationsNode::declarationsHelper(string declarationsHERA, HaverfordCS::list<ExprNode *> declarations, ContextInfo context,
-                                            int FPoffset) const {
+string DeclarationsNode::declarationsHelper(string declarationsHERA, HaverfordCS::list<ExprNode *> declarations, ContextInfo context) const {
     if (empty(declarations)) {
         return declarationsHERA;
     }
     return declarationsHelper(declarationsHERA += first(declarations)->generateHERA(context), rest(declarations),
-                              context, FPoffset);
+                              context);
 }
 
 string DeclarationNode::generateHERA(const ContextInfo &context) const
 {
-    trace << "Entered DeclarationNode::generateHERA for declaration " + variable.getValue() + " = " + to_string(literal.getValue()) << endl;
+    auto literal = expr;
+    string value;
+    if (declType == "IntLiteralNode") {
+        *literal = intLiteral;
+        value = to_string(intLiteral.getValue());
+    }
+    else if (declType == "BoolLiteralNode") {
+        *literal = boolLiteral;
+        value = boolLiteral.getValue();
+    }
+    else if (declType == "definedVar") {
+        *literal = definedVar;
+        value = definedVar.getValue();
+    }
+
+    trace << "Entered DeclarationNode::generateHERA for declaration " + variable.getValue() + ((declType == "ExprNode")? " = expression" : " = " +
+    value) << endl;
+
+    if (declType == "definedVar") {
+        value = to_string(declarationDict.lookup(value));
+    }
 
     FPoffset += 1;
+
     declarationDict.add(variable.getValue(), FPoffset);
 
-    return "SET(" + context.getReg() + ", " + std::to_string(literal.getValue()) + ")\n" +
+    return ((declType == "ExprNode")? literal->generateHERA(context) :
+           (declType == "definedVar")? "LOAD(" + context.getReg() + ", " + value + ", FP)\n" :
+           "SET(" + context.getReg() + ", " + value + ")\n") +
            "STORE(" + context.getReg() + ", " + std::to_string(FPoffset) + ", FP)\n";
 }
+
+
+
 
