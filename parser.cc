@@ -15,16 +15,20 @@ using std::endl;
 
 // match this:
 // START -> E   <followed by end-of-input>
-// E -> number
+// E -> integer
+// E -> boolean
 // E -> identifier
 // E -> ( E_IN_PARENS )
 // E_IN_PARENS -> OP E E
+// E_IN_PARENS -> declarations
+// declarations -> [ E_IN_BRACKETS ] declarations
+// declarations -> ""
 // E_IN_PARENS -> EXIT
 // E_IN_PARENS -> GETINT   // New in this version, gets user input
 // E_IN_PARENS -> if
 // if -> E E E
 
-// OP --> +|-|*| OP_COMPARE
+// OP --> +|-|*|<=|=|>= OP_COMPARE
 
 // Declare all functions, so they can call each other in any order
 //  (note: "static" means it's restricted to this scope, e.g. this file

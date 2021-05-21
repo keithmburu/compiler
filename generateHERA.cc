@@ -53,9 +53,11 @@ string ComparisonNode::generateHERA(const ContextInfo &context) const
     //	trace << "need to compare the result of left-hand-side:\n" << left->generateHERA(context) << endl;
     //	trace << "                        with right-hand-side:\n" << left->generateHERA(context.evalThisAfter()) << endl;
 
-    if (right->getType() != "IntLiteralNode" || left->getType() != "IntLiteralNode") {
-        cerr << endl << "!Type error! cannot perform comparison operations on non-integers" << endl;
-        exit(98);
+    if (left->getType() != "CallNode" && right->getType() != "CallNode") {
+        if (left->getType() != "IntLiteralNode" || right->getType() != "IntLiteralNode") {
+            cerr << endl << "!Type error! cannot perform comparison operations on non-integers" << endl;
+            exit(98);
+        }
     }
 
     ContextInfo rhsContext = context.evalThisAfter();
@@ -86,20 +88,23 @@ string ArithmeticNode::generateHERA(const ContextInfo &context) const
 {
 	trace << "Entered ArithmeticNode::generateHERA for operator " + o << endl;
 	if (length(subexps) != 2) {
-		throw "generateHERA not implemented for non-binary arithmetic";
+		throw "compiler incomplete/inconsistent: generateHERA not implemented for non-binary arithmetic";
 	}
 
-    if (first(subexps)->getType() != "IntLiteralNode" || first(rest(subexps))->getType() != "IntLiteralNode") {
-        cerr << endl << "!Type error! cannot perform arithmetic operations on non-integers" << endl;
-        exit(99);
+    if (first(subexps)->getType() != "CallNode" && first(rest(subexps))->getType() != "CallNode") {
+        if (first(subexps)->getType() != "IntLiteralNode" || first(rest(subexps))->getType() != "IntLiteralNode") {
+            cerr << endl << "!Type error! cannot perform arithmetic operations on non-integers" << endl;
+            exit(99);
+        }
     }
 
 	ContextInfo rhsContext = context.evalThisAfter();
 	ContextInfo lhsContext = context;  // just named for symmetry
 
-    return (first(subexps)->generateHERA(lhsContext) +
-		first(rest(subexps))->generateHERA(rhsContext) +
-		HERA_op(o)+"("+context.getReg()+", "+lhsContext.getReg()+", "+rhsContext.getReg()+")\n");
+    string leftHERA = first(subexps)->generateHERA(lhsContext);
+    string rightHERA = first(rest(subexps))->generateHERA(rhsContext);
+
+    return  leftHERA + rightHERA + HERA_op(o)+"("+context.getReg()+", "+lhsContext.getReg()+", "+rhsContext.getReg()+")\n";
 }
 
 string VarUseNode::generateHERA(const ContextInfo &context) const
@@ -124,6 +129,14 @@ string CallNode::generateHERA(const ContextInfo &context) const
 string ConditionalNode::generateHERA(const ContextInfo &context) const
 {
     trace << "Entered ConditionalNode::generateHERA" << endl;
+
+    if (expriftrue->getType() != "CallNode" && expriffalse->getType() != "CallNode") {
+        if (expriftrue->getType() != expriffalse->getType()) {
+            cerr << endl << "!Type error! \"then\" and \"else\" statements must be of the same type" << endl;
+            exit(45);
+        }
+    }
+
     ContextInfo conditionContext = context;
     ContextInfo expriftrueContext = context.evalThisAfter();
     ContextInfo expriffalseContext = context.evalThisAfter().evalThisAfter();
@@ -131,8 +144,11 @@ string ConditionalNode::generateHERA(const ContextInfo &context) const
     ContextInfo labelContext1 = ContextInfo();
     ContextInfo labelContext2 = ContextInfo();
 
-    return  condition->generateHERA(conditionContext) + expriftrue->generateHERA(expriftrueContext) +
-            expriffalse->generateHERA(expriffalseContext) +
+    string conditionHERA = condition->generateHERA(conditionContext);
+    string expriftrueHERA = expriftrue->generateHERA(expriftrueContext);
+    string expriffalseHERA = expriffalse->generateHERA(expriffalseContext);
+
+    return  conditionHERA + expriftrueHERA + expriffalseHERA +
             "FLAGS(" + conditionContext.getReg() + ")\n" +
             "BZ(" + labelContext1.getLabel() + ")\n" +
             "MOVE(" + context.getReg() + ", " + expriftrueContext.getReg() + ")\n" +
