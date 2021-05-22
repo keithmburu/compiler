@@ -79,12 +79,12 @@ CallNode::CallNode(string funcName, HaverfordCS::list<ExprNode *>arguments) :
 	alloc_trace << "(class       CallNode constructor called for node at memory " << this << endl;
 }
 
-ConditionalNode::ConditionalNode(ExprNode *condition, ExprNode *expriftrue, ExprNode *expriffalse) :
+IfNode::IfNode(ExprNode *condition, ExprNode *expriftrue, ExprNode *expriffalse) :
     condition(condition),
     expriftrue(expriftrue),
     expriffalse(expriffalse)
 {
-    alloc_trace << "(class ConditionalNode constructor called for node at memory " << this << endl;
+    alloc_trace << "(class IfNode constructor called for node at memory " << this << endl;
 }
 
 LetNode::LetNode(ExprNode *declarations, HaverfordCS::list<ExprNode *> expressions) :
@@ -219,9 +219,9 @@ CallNode::~CallNode()
 	deleteAllSubtrees(argList);
 }
 
-ConditionalNode::~ConditionalNode()
+IfNode::~IfNode()
 {
-    alloc_trace << " class     ConditionalNode  destructor called for node at memory " << this << ")" << endl;
+    alloc_trace << " class     IfNode  destructor called for node at memory " << this << ")" << endl;
 }
 
 LetNode::~LetNode()

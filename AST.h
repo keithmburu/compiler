@@ -172,11 +172,11 @@ class CallNode : public ExprNode {
         const std::string type = "CallNode";
 };
 
-class ConditionalNode : public ExprNode {
+class IfNode : public ExprNode {
 public:
-    ConditionalNode(ExprNode *condition, ExprNode *expriftrue, ExprNode *expriffalse);
+    IfNode(ExprNode *condition, ExprNode *expriftrue, ExprNode *expriffalse);
 #if FREE_AST_VIA_DESTRUCTORS
-    ~ConditionalNode();
+    ~IfNode();
 #endif
     std::string getType() const { return type; }
 
@@ -185,7 +185,7 @@ private:
     ExprNode *condition;
     ExprNode *expriftrue;
     ExprNode *expriffalse;
-    const std::string type = "ConditionalNode";
+    const std::string type = "IfNode";
 };
 
 class DeclarationsNode : public ExprNode {

@@ -19,14 +19,17 @@ using std::endl;
 // E -> boolean
 // E -> identifier
 // E -> ( E_IN_PARENS )
+// E? -> E E?
+// E? -> ""
 // E_IN_PARENS -> OP E E
-// E_IN_PARENS -> declarations
-// declarations -> [ E_IN_BRACKETS ] declarations
-// declarations -> ""
+// E_IN_PARENS -> letstar E E E?
+// E_IN_PARENS -> [ E_IN_BRACKETS ] E_IN_PARENS
+// E_IN_PARENS -> ""
 // E_IN_PARENS -> EXIT
 // E_IN_PARENS -> GETINT   // New in this version, gets user input
-// E_IN_PARENS -> if
-// if -> E E E
+// E_IN_PARENS -> if E E E
+
+// E_IN_BRACKETS -> E E
 
 // OP --> +|-|*|<=|=|>= OP_COMPARE
 
@@ -153,7 +156,7 @@ static ParserResult matchEInParens() {
 	    ParserResult condition = matchE();
         ParserResult expriftrue = matchE();
         ParserResult expriffalse = matchE();
-        return new ConditionalNode(condition, expriftrue, expriffalse);
+        return new IfNode(condition, expriftrue, expriffalse);
     } else if (currentTokenKind() == IDENTIFIER && currentToken() == "letstar") {
         mustGetNextToken();
         ParserResult declarations = matchE();

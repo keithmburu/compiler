@@ -54,7 +54,8 @@ string ComparisonNode::generateHERA(const ContextInfo &context) const
     //	trace << "                        with right-hand-side:\n" << left->generateHERA(context.evalThisAfter()) << endl;
 
     if (left->getType() != "CallNode" && right->getType() != "CallNode") {
-        if (left->getType() != "IntLiteralNode" || right->getType() != "IntLiteralNode") {
+        if ((left->getType() != "IntLiteralNode" && left->getType() != "VarUseNode" && left->getType() != "LetNode") ||
+                (right->getType() != "IntLiteralNode" && right->getType() != "VarUseNode" && right->getType() != "LetNode")) {
             cerr << endl << "!Type error! cannot perform comparison operations on non-integers" << endl;
             exit(98);
         }
@@ -92,7 +93,9 @@ string ArithmeticNode::generateHERA(const ContextInfo &context) const
 	}
 
     if (first(subexps)->getType() != "CallNode" && first(rest(subexps))->getType() != "CallNode") {
-        if (first(subexps)->getType() != "IntLiteralNode" || first(rest(subexps))->getType() != "IntLiteralNode") {
+        if ((first(subexps)->getType() != "IntLiteralNode" && first(subexps)->getType() != "VarUseNode" && first(subexps)->getType() != "LetNode") ||
+                (first(rest(subexps))->getType() != "IntLiteralNode" && first(rest(subexps))->getType() != "VarUseNode" && first(rest(subexps))
+                ->getType() != "LetNode")) {
             cerr << endl << "!Type error! cannot perform arithmetic operations on non-integers" << endl;
             exit(99);
         }
@@ -126,9 +129,9 @@ string CallNode::generateHERA(const ContextInfo &context) const
 		(context.getReg()=="R1"?"":"MOVE("+context.getReg()+", R1)\n"));
 }
 
-string ConditionalNode::generateHERA(const ContextInfo &context) const
+string IfNode::generateHERA(const ContextInfo &context) const
 {
-    trace << "Entered ConditionalNode::generateHERA" << endl;
+    trace << "Entered IfNode::generateHERA" << endl;
 
     if (expriftrue->getType() != "CallNode" && expriffalse->getType() != "CallNode") {
         if (expriftrue->getType() != expriffalse->getType()) {
