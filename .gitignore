@@ -1,8 +1,0 @@
-*~
-#*#
-cmake-build-debug
-Debug
-.settings
-.idea
-.DS_Store
-Compiler.out
